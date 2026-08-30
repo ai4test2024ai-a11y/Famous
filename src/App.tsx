@@ -40,6 +40,8 @@ function Shell() {
     { id: "categories", label: t("nav.categories"), icon: "grid", to: "/categories" },
     { id: "explore", label: t("nav.explore"), icon: "search", to: "/explore" },
     { id: "leaderboard", label: t("nav.leaderboard"), icon: "trophy", to: "/leaderboard" },
+    { id: "help", label: t("nav.help"), icon: "spark", to: "/help" },
+    { id: "about", label: t("nav.about"), icon: "medal", to: "/about" },
   ];
 
   const level = levelFromXp(profile.xp);
@@ -55,7 +57,7 @@ function Shell() {
             <Logo />
           </button>
 
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden xl:flex items-center gap-0.5">
             {nav.map((n) => {
               const active = route.page === n.id || (n.id === "play" && route.page === "quiz");
               return (
@@ -63,9 +65,9 @@ function Shell() {
                   key={n.id}
                   type="button"
                   onClick={() => { sfx.play("click"); go(n.to); }}
-                  className={`clip-card-sm flex items-center gap-2 px-4 py-2.5 font-display text-[11px] font-bold tracking-wide transition-colors ${active ? "bg-gold-500/15 text-gold-400" : "text-cream-300 hover:bg-ink-800 hover:text-cream-50"}`}
+                  className={`clip-card-sm flex items-center gap-1.5 px-3 py-2.5 font-display text-[11px] font-bold tracking-wide transition-colors ${active ? "bg-gold-500/15 text-gold-400" : "text-cream-300 hover:bg-ink-800 hover:text-cream-50"}`}
                 >
-                  <Ic n={n.icon} size={14} /> {n.label}
+                  <Ic n={n.icon} size={13} /> {n.label}
                 </button>
               );
             })}
@@ -129,16 +131,16 @@ function Shell() {
             </button>
 
             {/* burger */}
-            <button type="button" onClick={() => { setMenuOpen((o) => !o); sfx.play("click"); }} className="btn btn-ghost clip-card-sm px-3 py-2.5 lg:hidden">
+            <button type="button" onClick={() => { setMenuOpen((o) => !o); sfx.play("click"); }} className="btn btn-ghost clip-card-sm px-3 py-2.5 xl:hidden">
               <Ic n={menuOpen ? "x" : "list"} size={16} />
             </button>
           </div>
         </div>
 
         {menuOpen && (
-          <div className="anim-pop border-t border-ink-700/60 bg-ink-900/95 px-4 py-4 lg:hidden">
+          <div className="anim-pop border-t border-ink-700/60 bg-ink-900/95 px-4 py-4 xl:hidden pb-[calc(1rem+env(safe-area-inset-bottom))]">
             <div className="grid grid-cols-2 gap-2">
-              {[...nav, { id: "profile", label: t("nav.profile"), icon: "user", to: "/profile" }, { id: "help", label: t("nav.help"), icon: "spark", to: "/help" }, { id: "about", label: t("nav.about"), icon: "medal", to: "/about" }].map((n) => (
+              {[...nav, { id: "profile", label: t("nav.profile"), icon: "user", to: "/profile" }].map((n) => (
                 <button
                   key={n.id}
                   type="button"
