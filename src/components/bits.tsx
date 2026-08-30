@@ -325,9 +325,9 @@ export function SectionHead({ title, sub, icon }: { title: string; sub?: string;
 export function Toasts() {
   const { toasts } = useApp();
   return (
-    <div className="fixed bottom-5 start-5 z-[90] flex flex-col gap-2.5">
+    <div className="fixed z-[90] flex flex-col gap-2.5 start-4 end-4 sm:start-5 sm:end-auto" style={{ bottom: "calc(1.25rem + env(safe-area-inset-bottom))" }}>
       {toasts.map((toast) => (
-        <div key={toast.id} className="anim-pop glass clip-card-sm flex items-center gap-3 px-4 py-3 shadow-xl shadow-black/40 min-w-[240px] max-w-[320px]">
+        <div key={toast.id} className="anim-pop glass clip-card-sm flex items-center gap-3 px-4 py-3 shadow-xl shadow-black/40 sm:min-w-[240px] max-w-full sm:max-w-[320px]">
           <span className={`flex h-9 w-9 shrink-0 items-center justify-center clip-card-sm ${toast.kind === "ach" ? "bg-gold-500/20 text-gold-400" : toast.kind === "level" ? "bg-mint-500/20 text-mint-400" : "bg-coral-500/20 text-coral-400"}`}>
             <Ic n={toast.kind === "ach" ? "medal" : toast.kind === "level" ? "bolt" : "spark"} size={18} />
           </span>

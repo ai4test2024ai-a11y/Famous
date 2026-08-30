@@ -60,7 +60,7 @@ export default function LeaderboardPage() {
       </div>
 
       <div className="mt-6 clip-card glass overflow-hidden">
-        <div className="grid grid-cols-[52px_1fr_70px_80px] sm:grid-cols-[64px_1fr_80px_80px_80px_80px] items-center gap-2 border-b border-ink-700 bg-ink-900/80 px-4 py-3 text-[9px] font-black tracking-[0.18em] text-cream-500">
+        <div className="grid grid-cols-[44px_1fr_56px_72px] sm:grid-cols-[64px_1fr_80px_80px_80px_80px] items-center gap-1.5 sm:gap-2 border-b border-ink-700 bg-ink-900/80 px-3 sm:px-4 py-3 text-[9px] font-black tracking-[0.18em] text-cream-500">
           <span>{t("lb.rank")}</span>
           <span>{t("lb.player")}</span>
           <span className="text-center">{t("lb.level")}</span>
@@ -71,7 +71,7 @@ export default function LeaderboardPage() {
         {rows.map((r, i) => (
           <div
             key={`${r.name}-${i}`}
-            className={`anim-slide grid grid-cols-[52px_1fr_70px_80px] sm:grid-cols-[64px_1fr_80px_80px_80px_80px] items-center gap-2 border-b border-ink-800 px-4 py-3 transition-colors ${r.you ? "bg-gold-500/[0.09] border-s-2 border-s-gold-400" : "hover:bg-ink-800/50"}`}
+            className={`anim-slide grid grid-cols-[44px_1fr_56px_72px] sm:grid-cols-[64px_1fr_80px_80px_80px_80px] items-center gap-1.5 sm:gap-2 border-b border-ink-800 px-3 sm:px-4 py-3 transition-colors ${r.you ? "bg-gold-500/[0.09] border-s-2 border-s-gold-400" : "hover:bg-ink-800/50"}`}
             style={{ animationDelay: `${i * 0.04}s` }}
           >
             <span className="flex items-center gap-1.5">

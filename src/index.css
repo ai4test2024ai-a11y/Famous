@@ -225,3 +225,51 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 @media (prefers-reduced-motion: reduce) {
   .anim-floaty, .marquee, .anim-spin-slow, .anim-glow { animation: none !important; }
 }
+
+/* ================= MOBILE / WEB-APP HARDENING ================= */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+body {
+  -webkit-tap-highlight-color: transparent;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+button, a, select, [role="button"] {
+  touch-action: manipulation; /* kills double-tap zoom & 300ms delay */
+}
+/* Prevent iOS focus-zoom on small inputs/selects (kept ≥16px) */
+#root input, #root select, #root textarea {
+  font-size: max(16px, 0.95em) !important;
+}
+/* No sticky-hover on touch devices */
+@media (hover: none) {
+  .btn:hover { transform: none; filter: none; }
+  .card-glow:hover::after { opacity: 0; }
+}
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+/* Dynamic viewport height for mobile browser chrome */
+@supports (height: 100dvh) {
+  .min-h-dvh { min-height: 100dvh; }
+}
+/* Safe-area aware helpers */
+.pt-safe { padding-top: env(safe-area-inset-top); }
+.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+.px-safe {
+  padding-left: max(0.75rem, env(safe-area-inset-left));
+  padding-right: max(0.75rem, env(safe-area-inset-right));
+}
+@media (min-width: 640px) {
+  .px-safe {
+    padding-left: max(1.5rem, env(safe-area-inset-left));
+    padding-right: max(1.5rem, env(safe-area-inset-right));
+  }
+}
+/* Ensure media never escapes its container */
+img, svg, video, canvas { max-width: 100%; }
+/* Long unbroken strings (names/numbers) wrap instead of overflowing */
+p, h1, h2, h3, button, span, div { overflow-wrap: break-word; min-width: 0; }

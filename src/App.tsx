@@ -13,6 +13,8 @@ import ExplorePage from "./pages/Explore";
 import ProfilePage from "./pages/Profile";
 import LeaderboardPage from "./pages/Leaderboard";
 import PersonPage from "./pages/Person";
+import AboutPage from "./pages/About";
+import HelpPage from "./pages/Help";
 
 const LANGS: { id: Lang; label: string; flag: string }[] = [
   { id: "en", label: "English", flag: "EN" },
@@ -43,12 +45,12 @@ function Shell() {
   const level = levelFromXp(profile.xp);
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-dvh">
       <ParticlesBg />
 
       {/* ================= NAV ================= */}
-      <header className="sticky top-0 z-50 border-b border-ink-700/60 bg-ink-950/85 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
+      <header className="sticky top-0 z-50 border-b border-ink-700/60 bg-ink-950/85 backdrop-blur-xl pt-[env(safe-area-inset-top)]">
+        <div className="px-safe mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 sm:gap-3">
           <button type="button" onClick={() => { sfx.play("click"); go("/"); }} className="shrink-0">
             <Logo />
           </button>
@@ -106,6 +108,16 @@ function Shell() {
               <Ic n={soundOn ? "vol" : "volOff"} size={15} className={soundOn ? "text-mint-400" : "text-cream-500"} />
             </button>
 
+            {/* help */}
+            <button
+              type="button"
+              onClick={() => { sfx.play("click"); go("/help"); }}
+              title={t("nav.help")}
+              className={`btn clip-card-sm px-3 py-2.5 font-display text-sm font-black ${route.page === "help" ? "btn-primary" : "btn-ghost text-cream-300"}`}
+            >
+              ؟
+            </button>
+
             {/* profile chip */}
             <button type="button" onClick={() => { sfx.play("click"); go("/profile"); }} className="btn btn-ghost clip-card-sm px-3 py-2 gap-2 hidden sm:inline-flex">
               <span className="flex h-6 w-6 items-center justify-center bg-gold-500 clip-card-sm font-display text-[10px] font-black text-ink-950">
@@ -126,7 +138,7 @@ function Shell() {
         {menuOpen && (
           <div className="anim-pop border-t border-ink-700/60 bg-ink-900/95 px-4 py-4 lg:hidden">
             <div className="grid grid-cols-2 gap-2">
-              {[...nav, { id: "profile", label: t("nav.profile"), icon: "user", to: "/profile" }].map((n) => (
+              {[...nav, { id: "profile", label: t("nav.profile"), icon: "user", to: "/profile" }, { id: "help", label: t("nav.help"), icon: "spark", to: "/help" }, { id: "about", label: t("nav.about"), icon: "medal", to: "/about" }].map((n) => (
                 <button
                   key={n.id}
                   type="button"
@@ -151,6 +163,8 @@ function Shell() {
           {route.page === "profile" && <ProfilePage />}
           {route.page === "leaderboard" && <LeaderboardPage />}
           {route.page === "person" && route.param && <PersonPage id={route.param} />}
+          {route.page === "about" && <AboutPage />}
+          {route.page === "help" && <HelpPage />}
         </div>
       </main>
 
@@ -188,8 +202,18 @@ function Shell() {
             </div>
           </div>
         </div>
-        <div className="border-t border-ink-800 py-4 text-center text-[11px] font-semibold text-cream-500">
-          © {new Date().getFullYear()} {t("brand")} — {t("footer.rights")}
+        <div className="border-t border-ink-800 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-center text-[11px] font-semibold text-cream-500">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-4 gap-y-2 px-4">
+            <span>© {new Date().getFullYear()} {t("brand")} — {t("footer.rights")}</span>
+            <span className="flex items-center gap-4">
+              <button type="button" onClick={() => { sfx.play("click"); go("/help"); }} className="inline-flex items-center gap-1.5 font-bold text-cream-300 transition-colors hover:text-gold-400">
+                <Ic n="spark" size={12} /> {t("nav.help")}
+              </button>
+              <button type="button" onClick={() => { sfx.play("click"); go("/about"); }} className="inline-flex items-center gap-1.5 font-bold text-cream-300 transition-colors hover:text-gold-400">
+                <Ic n="medal" size={12} /> {t("nav.about")}
+              </button>
+            </span>
+          </div>
         </div>
       </footer>
 

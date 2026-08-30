@@ -419,9 +419,9 @@ export default function QuizPage({ mode, cat }: { mode: string; cat?: string }) 
   const timerColor = tPct > 50 ? "#4dffd8" : tPct > 25 ? "#ffc95c" : "#ff5470";
 
   return (
-    <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
+    <div className="no-select mx-auto max-w-3xl px-4 sm:px-6 py-8">
       {/* HUD */}
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-2 sm:gap-3">
         <button type="button" onClick={() => { window.clearTimeout(advanceTimer.current); go("/"); }} className="btn btn-ghost clip-card-sm px-3 py-2 text-cream-300">
           <Ic n="x" size={15} />
         </button>
@@ -429,9 +429,9 @@ export default function QuizPage({ mode, cat }: { mode: string; cat?: string }) 
           <div className="font-display text-[11px] sm:text-xs font-bold tracking-wide text-cream-300">
             {t("quiz.question", { a: digits(idx + 1), b: digits(qs.length) })}
           </div>
-          <div className="mt-1.5 flex justify-center gap-1">
+          <div className="mt-1.5 flex justify-center gap-[3px] sm:gap-1">
             {qs.map((_, i) => (
-              <span key={i} className={`h-1.5 w-4 clip-card-sm transition-colors ${i < idx ? "bg-mint-500" : i === idx ? "bg-gold-400" : "bg-ink-700"}`} />
+              <span key={i} className={`h-1.5 w-1.5 sm:w-4 clip-card-sm transition-colors ${i < idx ? "bg-mint-500" : i === idx ? "bg-gold-400" : "bg-ink-700"}`} />
             ))}
           </div>
         </div>
