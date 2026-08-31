@@ -92,12 +92,12 @@ export function Logo({ compact = false }: { compact?: boolean }) {
         <path d="m24 12 3.1 6.4 7 .9-5.1 4.9 1.3 7L24 27.9l-6.3 3.3 1.3-7-5.1-4.9 7-.9Z" fill="#f5ad1d" />
         <ellipse cx="24" cy="24" rx="19" ry="7.5" fill="none" stroke="#1fe0bd" strokeWidth="1.4" opacity="0.75" transform="rotate(-18 24 24)" />
       </svg>
-      <div className="min-w-0 leading-none">
-        <div className="font-display font-black tracking-tight text-cream-100 text-[13px] sm:text-[15px] leading-tight">
+      <div className="hidden min-w-0 leading-none min-[430px]:block">
+        <div className="font-display font-black tracking-tight text-cream-100 text-[10px] sm:text-[13px] lg:text-[15px] leading-tight">
           {t("brand")}
         </div>
         {!compact && (
-          <div className="mt-1 text-[8.5px] sm:text-[9px] font-bold tracking-[0.28em] text-gold-400">
+          <div className="mt-1 hidden text-[8.5px] font-bold tracking-[0.18em] text-gold-400 lg:block">
             {t("brand.sub")}
           </div>
         )}
