@@ -52,12 +52,12 @@ function Shell() {
 
       {/* ================= NAV ================= */}
       <header className="sticky top-0 z-50 border-b border-ink-700/60 bg-ink-950/85 backdrop-blur-xl pt-[env(safe-area-inset-top)]">
-        <div className="px-safe mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 sm:gap-3">
+        <div className="px-safe mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-2 gap-y-1.5 py-2.5 sm:gap-x-3">
           <button type="button" onClick={() => { sfx.play("click"); go("/"); }} className="shrink-0">
             <Logo />
           </button>
 
-          <nav className="hidden xl:flex items-center gap-0.5">
+          <nav className="order-3 hidden basis-full items-center gap-0.5 overflow-x-auto no-scrollbar whitespace-nowrap xl:order-none xl:flex xl:basis-auto xl:overflow-visible">
             {nav.map((n) => {
               const active = route.page === n.id || (n.id === "play" && route.page === "quiz");
               return (
@@ -65,7 +65,7 @@ function Shell() {
                   key={n.id}
                   type="button"
                   onClick={() => { sfx.play("click"); go(n.to); }}
-                  className={`clip-card-sm flex items-center gap-1.5 px-3 py-2.5 font-display text-[11px] font-bold tracking-wide transition-colors ${active ? "bg-gold-500/15 text-gold-400" : "text-cream-300 hover:bg-ink-800 hover:text-cream-50"}`}
+                  className={`clip-card-sm flex shrink-0 items-center gap-1.5 whitespace-nowrap px-2.5 py-2 font-display text-[10px] font-bold tracking-wide transition-colors 2xl:px-3 2xl:text-[11px] ${active ? "bg-gold-500/15 text-gold-400" : "text-cream-300 hover:bg-ink-800 hover:text-cream-50"}`}
                 >
                   <Ic n={n.icon} size={13} /> {n.label}
                 </button>
@@ -73,13 +73,13 @@ function Shell() {
             })}
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             {/* language */}
             <div className="relative">
               <button
                 type="button"
                 onClick={() => { setLangOpen((o) => !o); sfx.play("click"); }}
-                className="btn btn-ghost clip-card-sm px-3 py-2.5 text-[11px] font-bold"
+                className="btn btn-ghost clip-card-sm shrink-0 whitespace-nowrap px-2.5 py-2.5 text-[11px] font-bold sm:px-3"
               >
                 <Ic n="globe" size={14} />
                 <span>{LANGS.find((l) => l.id === lang)?.flag}</span>
