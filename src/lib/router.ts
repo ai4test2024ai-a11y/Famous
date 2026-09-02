@@ -2,24 +2,18 @@ import { useEffect, useState } from "react";
 
 export interface Route {
   page: string;
-  param?: string;
   query: URLSearchParams;
 }
 
 export function parseHash(): Route {
   const h = window.location.hash.replace(/^#\/?/, "");
   const [path, qs] = h.split("?");
-  const segs = path.split("/").filter(Boolean);
-  return {
-    page: segs[0] || "home",
-    param: segs[1] ? decodeURIComponent(segs[1]) : undefined,
-    query: new URLSearchParams(qs ?? ""),
-  };
+  return { page: path || "home", query: new URLSearchParams(qs ?? "") };
 }
 
 export function go(path: string) {
   window.location.hash = path;
-  window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+  window.scrollTo(0, 0);
 }
 
 export function useRoute(): Route {
