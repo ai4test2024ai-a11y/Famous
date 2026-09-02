@@ -1,0 +1,17 @@
+{
+  "name": "Guess Your Famous People — The Global Legends Quiz Game",
+  "short_name": "GYFP",
+  "description": "The global legends quiz game: 96,000+ famous people, birthdate quiz, daily challenge, leaderboards. EN / فارسی / العربية.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#050b12",
+  "theme_color": "#050b12",
+  "lang": "en",
+  "dir": "auto",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "favicon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
