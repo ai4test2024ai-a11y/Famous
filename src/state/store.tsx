@@ -93,10 +93,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return s.replace(/[0-9]/g, (d) => map[Number(d)]);
   }, [lang]);
 
-  const isUnlocked = useCallback((diffId: number) => {
-    if (diffId <= 1) return true;
-    return (profileRef.current.bestAcc[diffId - 1] ?? 0) >= 50;
-  }, []);
+  /* All four difficulties are open from the start (player request). */
+  const isUnlocked = useCallback((_diffId: number) => true, []);
 
   const recordGame = useCallback((g: GameSummary) => {
     const prev = profileRef.current;
