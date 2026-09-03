@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { useEffect, useMemo, useRef } from "react";
 import type { Person, Lang } from "../data/people";
-import { catDef, localizedName, countryCode3, initialsOf } from "../data/people";
+import { catDef, localizedName, countryCode3, genderOf, eraOf } from "../data/people";
 import { useApp } from "../state/store";
 
 /* ---------------- inline SVG icons ---------------- */
@@ -73,46 +73,164 @@ function hashStr(s: string): number {
   for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
   return h >>> 0;
 }
+
+/* diverse, deterministic skin [light, shadow] pairs */
+const SKINS: [string, string][] = [
+  ["#f6d3ac", "#e0b183"], ["#eec39a", "#d3a173"], ["#e2b183", "#c78f5c"],
+  ["#cf9a67", "#b07a47"], ["#b57f4f", "#96633a"], ["#96633a", "#7a4d28"],
+  ["#7a4f2c", "#5f3a1e"], ["#f9e0c3", "#eac89f"],
+];
+const HAIRS = ["#241812", "#3a2618", "#54351f", "#6e4a2a", "#8a6238", "#2e2e2e", "#8f8f8f", "#d3d3d3", "#4c2e1a", "#7c3f24", "#191310", "#5a5a5a"];
+
 export function Portrait({ person, className = "", monogram = "text-2xl", mystery = false }: {
   person: Person; className?: string; monogram?: string; mystery?: boolean;
 }) {
   const theme = catDef(person.cat);
   const rc = RARITY_COLOR(person.pop);
   const h = hashStr(person.id);
-  const grad = `pg-${h}`;
+  const female = genderOf(person) === "f";
+  const era = eraOf(person);
+  const [skinL, skinD] = mystery ? (["#6a7c8e", "#54657a"] as [string, string]) : SKINS[h % SKINS.length];
+  const hairC = mystery ? "#41505f" : HAIRS[(h >> 3) % HAIRS.length];
+  const style = (h >> 6) % 3; /* f: 0 long · 1 bob · 2 bun — m: fringe or not */
+  const hasBeard = !female && !mystery && ((h >> 9) % 100) < (era <= 2 ? 55 : 16);
+  const earring = female && !mystery && ((h >> 11) % 3) === 0;
+  const c1 = mystery ? "#5b6b7d" : theme.c1;
+  const c2 = mystery ? "#7d8fa1" : theme.c2;
+  const g = `pv-${h}`;
+  const hairG = `url(#${g}-hr)`;
+
   return (
     <div
       className={`relative overflow-hidden ${className}`}
-      style={{ background: `linear-gradient(160deg, ${theme.c1}33, #0b1826 55%, ${theme.c2}22)` } as CSSProperties}
+      style={{ background: `linear-gradient(160deg, ${c1}38, #0b1826 55%, ${c2}24)` } as CSSProperties}
       aria-hidden
     >
-      <svg className="absolute inset-0 h-full w-full opacity-[0.13]">
-        {Array.from({ length: 6 }, (_, i) => (
-          <circle key={i} cx="50%" cy="34%" r={`${10 + i * 10}%`} fill="none" stroke={theme.c2} strokeWidth="1" />
+      <svg className="absolute inset-0 h-full w-full opacity-[0.12]">
+        {Array.from({ length: 5 }, (_, i) => (
+          <circle key={i} cx="50%" cy="30%" r={`${12 + i * 11}%`} fill="none" stroke={c2} strokeWidth="1" />
         ))}
       </svg>
-      <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 25%, rgba(5,11,18,0.5) 70%, rgba(5,11,18,0.92))" }} />
-      <svg viewBox="0 0 100 120" className="absolute inset-x-0 bottom-0 mx-auto h-[82%] max-w-none" style={{ filter: `drop-shadow(0 0 12px ${theme.c1}55)` }}>
+      <div className="absolute inset-0" style={{ background: "radial-gradient(90% 70% at 50% 18%, rgba(255,255,255,0.06), transparent 55%), linear-gradient(180deg, transparent 30%, rgba(5,11,18,0.45) 75%, rgba(5,11,18,0.9))" }} />
+
+      <svg viewBox="0 0 100 120" preserveAspectRatio="xMidYMax meet" className="absolute inset-0 h-full w-full" style={{ filter: `drop-shadow(0 0 10px ${c1}44)` }}>
         <defs>
-          <linearGradient id={`${grad}-b`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor={mystery ? "#4d7396" : theme.c1} />
-            <stop offset="100%" stopColor="#0b1826" />
+          <linearGradient id={`${g}-cl`} x1="0" y1="0" x2="0.55" y2="1">
+            <stop offset="0%" stopColor={c1} />
+            <stop offset="100%" stopColor={mystery ? "#333f4d" : "#0d1927"} />
           </linearGradient>
-          <linearGradient id={`${grad}-h`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor={mystery ? "#6a8fb0" : theme.c2} />
-            <stop offset="100%" stopColor={mystery ? "#4d7396" : theme.c1} />
+          <radialGradient id={`${g}-sk`} cx="0.42" cy="0.3" r="0.9">
+            <stop offset="0%" stopColor={skinL} />
+            <stop offset="100%" stopColor={skinD} />
+          </radialGradient>
+          <linearGradient id={`${g}-hr`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={hairC} />
+            <stop offset="100%" stopColor={mystery ? "#333f4d" : "#16100c"} />
           </linearGradient>
         </defs>
-        <path d="M10 122 C10 90 28 74 50 74 C72 74 90 90 90 122 Z" fill={`url(#${grad}-b)`} opacity="0.96" />
-        <circle cx="50" cy="42" r="19" fill={`url(#${grad}-h)`} opacity="0.97" />
-        <circle cx="50" cy="42" r="19" fill="none" stroke={mystery ? "#6a8fb0" : theme.c2} strokeWidth="1.4" opacity="0.5" />
+
+        {/* aura behind figure */}
+        <ellipse cx="50" cy="88" rx="34" ry="27" fill={c1} opacity="0.15" />
+
+        {/* bun (female style 2) */}
+        {female && style === 2 && <circle cx="50" cy="24.5" r="7" fill={hairG} />}
+
+        {/* back hair falling behind shoulders (female long / bob) */}
+        {female && style === 0 && (
+          <path d="M31,46 C26,60 26,80 34,94 C37,87 36,72 35,60 C34,52 33,48 31,46 Z M69,46 C74,60 74,80 66,94 C63,87 64,72 65,60 C66,52 67,48 69,46 Z" fill={hairG} />
+        )}
+        {female && style === 1 && (
+          <path d="M32,46 C30,58 32,66 38,71 C40,64 38,55 36,48 Z M68,46 C70,58 68,66 62,71 C60,64 62,55 64,48 Z" fill={hairG} />
+        )}
+
+        {/* neck */}
+        <rect x="44" y="60" width="12" height="18" rx="5" fill={skinD} />
+
+        {/* torso / clothing in the category color */}
+        <path d="M13,120 C13,97 26,86 50,86 C74,86 87,97 87,120 Z" fill={`url(#${g}-cl)`} />
+        <path d="M18,120 C18,100 30,90 50,90 C70,90 82,100 82,120" fill="none" stroke="#ffffff" strokeWidth="1.1" opacity="0.1" />
+
+        {/* collar — jewel neck for women, shirt + tie for men */}
+        {female ? (
+          <path d="M41,87.5 C44,92.5 56,92.5 59,87.5 L56.8,85.6 C54,89 46,89 43.2,85.6 Z" fill="#0d1927" opacity="0.85" />
+        ) : (
+          <>
+            <path d="M42,86 L50,95.5 L58,86 L53.6,86 L50,90.6 L46.4,86 Z" fill="#0d1927" opacity="0.9" />
+            <path d="M48.7,95 L51.3,95 L50,103.5 Z" fill={c2} opacity="0.92" />
+          </>
+        )}
+
+        {/* category badge on chest */}
+        {!mystery && (
+          <g>
+            <circle cx="50" cy="110" r="5" fill="#0b1826" opacity="0.72" />
+            <path d="M50,105.8 l1.65,2.55 2.55,1.65 -2.55,1.65 -1.65,2.55 -1.65,-2.55 -2.55,-1.65 2.55,-1.65 Z" fill={c2} opacity="0.95" />
+          </g>
+        )}
+
+        {/* ears + earrings */}
+        <ellipse cx="34.4" cy="52" rx="3" ry="4.6" fill={skinD} />
+        <ellipse cx="65.6" cy="52" rx="3" ry="4.6" fill={skinD} />
+        {earring && (<><circle cx="34.2" cy="57.6" r="1.1" fill={c2} /><circle cx="65.8" cy="57.6" r="1.1" fill={c2} /></>)}
+
+        {/* head */}
+        <ellipse cx="50" cy="50" rx="15.4" ry="18.4" fill={`url(#${g}-sk)`} />
+
+        {/* beard (mostly ancient/classical eras) */}
+        {hasBeard && (
+          <>
+            <path d="M36,54 C36.5,66 42,73.5 50,73.5 C58,73.5 63.5,66 64,54 C63,64 57.5,69.5 50,69.5 C42.5,69.5 37,64 36,54 Z" fill={hairG} />
+            <path d="M44,59.3 C46.5,57.9 53.5,57.9 56,59.3 C53.5,61 46.5,61 44,59.3 Z" fill={hairG} />
+          </>
+        )}
+
+        {/* eyes */}
+        <ellipse cx="43.8" cy="50.6" rx="1.9" ry={female ? 2.7 : 2.4} fill="#241d18" />
+        <ellipse cx="56.2" cy="50.6" rx="1.9" ry={female ? 2.7 : 2.4} fill="#241d18" />
+        <circle cx="44.5" cy="49.8" r="0.65" fill="#ffffff" opacity="0.9" />
+        <circle cx="56.9" cy="49.8" r="0.65" fill="#ffffff" opacity="0.9" />
+        {/* brows */}
+        <path d="M40.4,45.6 C42.4,44.1 45.4,44.1 47,45.3" fill="none" stroke={hairC} strokeWidth={female ? 1.1 : 1.4} strokeLinecap="round" />
+        <path d="M59.6,45.6 C57.6,44.1 54.6,44.1 53,45.3" fill="none" stroke={hairC} strokeWidth={female ? 1.1 : 1.4} strokeLinecap="round" />
+        {/* nose */}
+        <path d="M50,50.5 C50.9,54 50.7,56.2 49.1,57.2" fill="none" stroke={skinD} strokeWidth="1.1" strokeLinecap="round" opacity="0.75" />
+        {/* lips */}
+        {female ? (
+          <path d="M45.2,61.6 C47.2,60.3 49,60.4 50,61.1 C51,60.4 52.8,60.3 54.8,61.6 C52.8,63.8 47.2,63.8 45.2,61.6 Z" fill="#c05f5b" opacity="0.92" />
+        ) : (
+          <path d="M45.8,62.2 C48,63.1 52,63.1 54.2,62.2" fill="none" stroke="#7c4a3a" strokeWidth="1.2" strokeLinecap="round" opacity="0.8" />
+        )}
+        {/* blush */}
+        {female && (<><circle cx="40.5" cy="56.5" r="2.6" fill="#e2707a" opacity="0.2" /><circle cx="59.5" cy="56.5" r="2.6" fill="#e2707a" opacity="0.2" /></>)}
+
+        {/* hair cap */}
+        {female ? (
+          <path d="M33.5,50 C31,32 39,25 50,25 C61,25 69,32 66.5,50 C66.5,39 60,31.5 50,31.5 C40,31.5 33.5,39 33.5,50 Z" fill={hairG} />
+        ) : (
+          <path d="M34.6,47 C33,34 40,27 50,27 C60,27 67,34 65.4,47 C64,38 58,33.5 50,33.5 C42,33.5 36,38 34.6,47 Z" fill={hairG} />
+        )}
+        {/* male side fringe variant */}
+        {!female && style === 1 && (
+          <path d="M40,34.5 C44,38.5 48,39.5 52,38.5 C49.5,35.5 45,33.8 40,34.5 Z" fill={hairG} />
+        )}
+        {/* female front strands */}
+        {female && style === 0 && (
+          <path d="M34.2,44 C32.2,54 33,64 37.2,70.5 C38.2,62 36.6,52 36.2,45 Z M65.8,44 C67.8,54 67,64 62.8,70.5 C61.8,62 63.4,52 63.8,45 Z" fill={hairG} />
+        )}
+        {/* hair shine */}
+        <path d="M40.5,29.6 C44.5,26.8 55.5,26.8 59.5,29.6" fill="none" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" opacity="0.14" />
+
+        {/* category-colored rim light */}
+        <path d="M63.5,36 C66.6,42 67,54 62.5,62" fill="none" stroke={c2} strokeWidth="1.5" strokeLinecap="round" opacity="0.5" />
+        <path d="M68,88 C78,92 84,102 85.5,114" fill="none" stroke={c2} strokeWidth="2" strokeLinecap="round" opacity="0.28" />
       </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className={`font-display font-black select-none ${monogram}`}
-          style={{ color: "#fff", opacity: 0.9, textShadow: `0 2px 16px ${theme.c1}aa, 0 0 34px rgba(5,11,18,0.8)` }}>
-          {mystery ? "?" : initialsOf(person.en)}
-        </span>
-      </div>
+
+      {mystery && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className={`font-display font-black select-none text-cream-100/95 ${monogram}`} style={{ textShadow: "0 2px 16px rgba(5,11,18,0.9)" }}>?</span>
+        </div>
+      )}
+
       <div className="pointer-events-none absolute inset-0" style={{ boxShadow: `inset 0 0 0 1.5px ${rc}55, inset 0 0 30px rgba(5,11,18,0.5)` }} />
     </div>
   );

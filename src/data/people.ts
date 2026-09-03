@@ -451,6 +451,28 @@ export function initialsOf(name: string): string {
   const parts = name.trim().split(/\s+/);
   return ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase();
 }
+
+/* Known female first names — used to render feminine portraits.
+   Safe list only (no "-a" suffix guessing), so no man is ever misgendered. */
+const FEMALE_FIRST = new Set([
+  "Marilyn", "Audrey", "Scarlett", "Angelina", "Taylor", "Beyoncé", "Ariana", "Madonna",
+  "Whitney", "Shakira", "Adele", "Marie", "Cleopatra", "Oprah", "Serena", "Venus", "Naomi",
+  "Simone", "Malala", "Rosa", "Frida", "Coco", "Amelia", "Valentina", "Googoosh", "Forough",
+  "Hayedeh", "Leila", "Golshifteh", "Taraneh", "Shirin", "Marzieh", "Simin", "Aretha",
+  "Rihanna", "Dua", "Katy", "Miley", "Celine", "Britney", "Christina", "Selena", "Jennifer",
+  "Emma", "Anne", "Julia", "Nicole", "Sandra", "Halle", "Viola", "Zendaya", "Margot", "Gal",
+  "Florence", "Ellen", "JK", "Billie", "Doja", "Nicki", "Cardi", "Megan", "Alicia", "Björk",
+  "Enya", "Norah", "Sade", "Tina", "Cher", "Dolly", "Barbra", "Celia", "Amal", "Ruth", "Eva",
+  "Helen", "Grace", "Rosalind", "Ada", "Hypatia", "Sappho", "Joan", "Elizabeth", "Victoria",
+  "Catherine", "Nefertiti", "Indira", "Benazir", "Jacinda", "Angela", "Theresa", "Kamala",
+  "Hillary", "Michelle", "Eleanor", "Margaret", "Golda", "Lady", "Greta",
+]);
+
+export function genderOf(p: Person): "f" | "m" {
+  if (p.cat === "actresses") return "f";
+  const first = p.en.trim().split(/\s+/)[0].replace(/[.,!?]/g, "");
+  return FEMALE_FIRST.has(first) ? "f" : "m";
+}
 export function eraOf(p: Person): 1 | 2 | 3 | 4 | 5 {
   const y = yearOf(p);
   if (y < 1700) return 1;
