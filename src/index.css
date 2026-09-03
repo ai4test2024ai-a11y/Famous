@@ -124,6 +124,47 @@ body {
 }
 .card-glow:hover::after { opacity: 1; }
 
+/* ---------- living page: sparkles, meteors, nebula drift, orbit, scroll reveal ---------- */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.12; transform: scale(0.45) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.2) rotate(160deg); }
+}
+.anim-twinkle { animation: twinkle 2.8s ease-in-out infinite; }
+
+@keyframes shoot {
+  0% { transform: translate3d(0, 0, 0) rotate(-32deg); opacity: 0; }
+  3% { opacity: 1; }
+  13% { transform: translate3d(-55vw, 30vw, 0) rotate(-32deg); opacity: 0; }
+  100% { transform: translate3d(-55vw, 30vw, 0) rotate(-32deg); opacity: 0; }
+}
+.shoot-star {
+  position: absolute; width: 110px; height: 2px; border-radius: 2px; opacity: 0;
+  background: linear-gradient(90deg, rgba(255, 217, 138, 0), #ffd98a 55%, #ffffff);
+  box-shadow: 0 0 14px rgba(255, 217, 138, 0.7);
+  animation: shoot 12s linear infinite;
+}
+
+@keyframes driftA {
+  0%, 100% { transform: translate3d(-3%, -2%, 0) scale(1); }
+  50% { transform: translate3d(4%, 3%, 0) scale(1.15); }
+}
+@keyframes driftB {
+  0%, 100% { transform: translate3d(3%, 2%, 0) scale(1.1); }
+  50% { transform: translate3d(-4%, -3%, 0) scale(1); }
+}
+.drift-a { animation: driftA 18s ease-in-out infinite; }
+.drift-b { animation: driftB 23s ease-in-out infinite; }
+
+@keyframes orbitSpin { to { transform: rotate(360deg); } }
+.anim-orbit { animation: orbitSpin 26s linear infinite; }
+.anim-orbit-rev { animation: orbitSpin 18s linear infinite reverse; }
+
+.reveal { opacity: 0; transform: translateY(30px); }
+.reveal.on { animation: riseIn 0.65s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
 @media (prefers-reduced-motion: reduce) {
-  .anim-floaty, .marquee, .anim-spin-slow, .anim-glow { animation: none !important; }
+  .anim-floaty, .marquee, .anim-spin-slow, .anim-glow,
+  .anim-twinkle, .shoot-star, .drift-a, .drift-b,
+  .anim-orbit, .anim-orbit-rev { animation: none !important; }
+  .reveal { opacity: 1 !important; transform: none !important; }
 }
