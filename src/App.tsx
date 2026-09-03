@@ -8,6 +8,8 @@ import Home from "./views/Home";
 import Quiz from "./views/Quiz";
 import type { Mode } from "./views/Quiz";
 import { Leaderboard, Profile, Explore } from "./views/More";
+import About from "./views/About";
+import Help from "./views/Help";
 
 const LANGS: { id: Lang; label: string; flag: string }[] = [
   { id: "en", label: "English", flag: "EN" },
@@ -32,6 +34,8 @@ function Shell() {
     { id: "explore", label: t("nav.explore"), icon: "search", to: "/explore" },
     { id: "board", label: t("nav.board"), icon: "trophy", to: "/board" },
     { id: "profile", label: t("nav.profile"), icon: "user", to: "/profile" },
+    { id: "help", label: t("nav.help"), icon: "spark", to: "/help" },
+    { id: "about", label: t("nav.about"), icon: "medal", to: "/about" },
   ];
 
   const mode = (route.query.get("mode") ?? "classic") as Mode;
@@ -85,6 +89,12 @@ function Shell() {
               )}
             </div>
 
+            {/* help quick-button */}
+            <button type="button" onClick={() => { sfx.play("click"); go("/help"); }} title={t("nav.help")} aria-label={t("nav.help")}
+              className={`btn clip-card-sm shrink-0 px-3 py-2.5 font-display text-sm font-black ${route.page === "help" ? "btn-primary" : "btn-ghost text-cream-300"}`}>
+              ؟
+            </button>
+
             {/* sound */}
             <button type="button" onClick={() => { toggleSound(); sfx.play("click"); }} title={t("common.sound")} aria-label={t("common.sound")}
               className="btn btn-ghost clip-card-sm shrink-0 px-2.5 py-2.5">
@@ -120,6 +130,8 @@ function Shell() {
           {route.page === "board" && <Leaderboard />}
           {route.page === "profile" && <Profile />}
           {route.page === "explore" && <Explore initialCat={route.query.get("cat") ?? undefined} />}
+          {route.page === "about" && <About />}
+          {route.page === "help" && <Help />}
         </div>
       </main>
 
@@ -127,9 +139,11 @@ function Shell() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <Logo size={32} />
           <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
-            <button type="button" onClick={() => go("/quiz?mode=classic&diff=1")} className="text-cream-300 hover:text-gold-400 transition-colors">{t("nav.play")}</button>
-            <button type="button" onClick={() => go("/explore")} className="text-cream-300 hover:text-gold-400 transition-colors">{t("nav.explore")}</button>
-            <button type="button" onClick={() => go("/board")} className="text-cream-300 hover:text-gold-400 transition-colors">{t("nav.board")}</button>
+            <button type="button" onClick={() => { sfx.play("click"); go("/quiz?mode=classic&diff=1"); }} className="text-cream-300 hover:text-gold-400 transition-colors">{t("nav.play")}</button>
+            <button type="button" onClick={() => { sfx.play("click"); go("/explore"); }} className="text-cream-300 hover:text-gold-400 transition-colors">{t("nav.explore")}</button>
+            <button type="button" onClick={() => { sfx.play("click"); go("/board"); }} className="text-cream-300 hover:text-gold-400 transition-colors">{t("nav.board")}</button>
+            <button type="button" onClick={() => { sfx.play("click"); go("/help"); }} className="text-cream-300 hover:text-gold-400 transition-colors">{t("nav.help")}</button>
+            <button type="button" onClick={() => { sfx.play("click"); go("/about"); }} className="text-cream-300 hover:text-gold-400 transition-colors">{t("nav.about")}</button>
           </div>
         </div>
         <div className="border-t border-ink-800 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-center text-[11px] font-semibold text-cream-500">
