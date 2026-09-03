@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { useEffect, useMemo, useRef } from "react";
 import type { Person, Lang } from "../data/people";
-import { catDef, localizedName, countryCode3, genderOf, eraOf } from "../data/people";
+import { catDef, localizedName, countryCode3, genderOf } from "../data/people";
 import { useApp } from "../state/store";
 
 /* ---------------- inline SVG icons ---------------- */
@@ -89,11 +89,17 @@ export function Portrait({ person, className = "", monogram = "text-2xl", myster
   const rc = RARITY_COLOR(person.pop);
   const h = hashStr(person.id);
   const female = genderOf(person) === "f";
-  const era = eraOf(person);
-  const [skinL, skinD] = mystery ? (["#6a7c8e", "#54657a"] as [string, string]) : SKINS[h % SKINS.length];
-  const hairC = mystery ? "#41505f" : HAIRS[(h >> 3) % HAIRS.length];
-  const style = (h >> 6) % 3; /* f: 0 long · 1 bob · 2 bun — m: fringe or not */
-  const hasBeard = !female && !mystery && ((h >> 9) % 100) < (era <= 2 ? 55 : 16);
+  const [skinL, skinD] = mystery ? (["#93a7ba", "#7b90a5"] as [string, string]) : SKINS[h % SKINS.length];
+  const hairC = mystery ? "#5d7082" : HAIRS[(h >> 3) % HAIRS.length];
+  const style = (h >> 6) % 3; /* f: 0 long · 1 bob · 2 bun — m: 0 classic · 1 swept · 2 buzz */
+  const year = parseInt(person.dob.slice(0, 4), 10);
+  const classic = year < 1945 || ["historical", "leaders", "writers", "composers"].includes(person.cat);
+  const beardRoll = (h >> 9) % 100;
+  /* 0 none · 1 stubble · 2 full beard + mustache · 3 goatee + mustache */
+  const beardStyle = female || mystery ? 0 : classic
+    ? (beardRoll < 40 ? 2 : beardRoll < 62 ? 3 : beardRoll < 80 ? 1 : 0)
+    : (beardRoll < 20 ? 1 : beardRoll < 32 ? 3 : 0);
+  const glasses = !mystery && ((h >> 13) % 100) < (["scientists", "writers", "tech"].includes(person.cat) ? 28 : 10);
   const earring = female && !mystery && ((h >> 11) % 3) === 0;
   const c1 = mystery ? "#5b6b7d" : theme.c1;
   const c2 = mystery ? "#7d8fa1" : theme.c2;
@@ -106,14 +112,16 @@ export function Portrait({ person, className = "", monogram = "text-2xl", myster
       style={{ background: `linear-gradient(160deg, ${c1}38, #0b1826 55%, ${c2}24)` } as CSSProperties}
       aria-hidden
     >
-      <svg className="absolute inset-0 h-full w-full opacity-[0.12]">
-        {Array.from({ length: 5 }, (_, i) => (
-          <circle key={i} cx="50%" cy="30%" r={`${12 + i * 11}%`} fill="none" stroke={c2} strokeWidth="1" />
-        ))}
+      {/* soft bokeh backdrop */}
+      <svg className="absolute inset-0 h-full w-full" aria-hidden>
+        <circle cx="16%" cy="18%" r="5.5%" fill={c2} opacity={mystery ? 0.06 : 0.13} />
+        <circle cx="84%" cy="26%" r="4%" fill={c1} opacity={mystery ? 0.06 : 0.14} />
+        <circle cx="12%" cy="72%" r="3.2%" fill={c1} opacity={mystery ? 0.05 : 0.1} />
+        <circle cx="88%" cy="64%" r="2.6%" fill={c2} opacity={mystery ? 0.05 : 0.11} />
       </svg>
-      <div className="absolute inset-0" style={{ background: "radial-gradient(90% 70% at 50% 18%, rgba(255,255,255,0.06), transparent 55%), linear-gradient(180deg, transparent 30%, rgba(5,11,18,0.45) 75%, rgba(5,11,18,0.9))" }} />
+      <div className="absolute inset-0" style={{ background: "radial-gradient(90% 70% at 50% 16%, rgba(255,255,255,0.06), transparent 55%), linear-gradient(180deg, transparent 30%, rgba(5,11,18,0.45) 75%, rgba(5,11,18,0.9))" }} />
 
-      <svg viewBox="0 0 100 120" preserveAspectRatio="xMidYMax meet" className="absolute inset-0 h-full w-full" style={{ filter: `drop-shadow(0 0 10px ${c1}44)` }}>
+      <svg viewBox="0 0 100 124" preserveAspectRatio="xMidYMax slice" className="absolute inset-0 h-full w-full" style={{ filter: `drop-shadow(0 0 10px ${c1}44)` }}>
         <defs>
           <linearGradient id={`${g}-cl`} x1="0" y1="0" x2="0.55" y2="1">
             <stop offset="0%" stopColor={c1} />
@@ -130,10 +138,37 @@ export function Portrait({ person, className = "", monogram = "text-2xl", myster
         </defs>
 
         {/* aura behind figure */}
-        <ellipse cx="50" cy="88" rx="34" ry="27" fill={c1} opacity="0.15" />
+        <ellipse cx="50" cy="92" rx="35" ry="27" fill={c1} opacity={mystery ? 0.08 : 0.16} />
+
+        {/* neck */}
+        <path d="M44 70 L44 86 C44 89.5 56 89.5 56 86 L56 70 C52.5 74.8 47.5 74.8 44 70 Z" fill={skinD} />
+        <path d="M44 71.5 C47.5 76.2 52.5 76.2 56 71.5 L56 78.5 C52.5 81.5 47.5 81.5 44 78.5 Z" fill="rgba(15,8,4,0.18)" />
+
+        {/* torso in the category color */}
+        {female ? (
+          <>
+            <path d="M17.5 124 C19.5 100 31.5 88.5 43 86.5 C45.5 92 54.5 92 57 86.5 C68.5 88.5 80.5 100 82.5 124 Z" fill={`url(#${g}-cl)`} />
+            <path d="M43 86.5 C45.5 92 54.5 92 57 86.5 L55.6 88.8 C53 93.2 47 93.2 44.4 88.8 Z" fill="rgba(5,11,18,0.32)" />
+            {!mystery && <><circle cx="50" cy="95" r="1.35" fill={c2} /><circle cx="50" cy="95" r="2.8" fill="none" stroke={c2} strokeWidth="0.6" opacity="0.45" /></>}
+          </>
+        ) : (
+          <>
+            <path d="M16.5 124 C18.5 99 31 87.5 43.2 85.8 L50 93.5 L56.8 85.8 C69 87.5 81.5 99 83.5 124 Z" fill={`url(#${g}-cl)`} />
+            <path d="M44.6 86.6 L50 105.5 L55.4 86.6 C53.2 85.2 46.8 85.2 44.6 86.6 Z" fill="#f3ecda" opacity={mystery ? 0.4 : 0.92} />
+            <path d="M43.2 85.8 L50 93.5 L45.8 102.5 L39.6 90.4 Z" fill="rgba(5,11,18,0.38)" />
+            <path d="M56.8 85.8 L50 93.5 L54.2 102.5 L60.4 90.4 Z" fill="rgba(5,11,18,0.38)" />
+            {!mystery && <><path d="M48.7 92.8 L51.3 92.8 L52.7 106.5 L50 114.5 L47.3 106.5 Z" fill={c2} /><path d="M48.4 90.4 L51.6 90.4 L50.8 93.8 L49.2 93.8 Z" fill={c2} opacity="0.72" /></>}
+          </>
+        )}
+
+        {/* ears */}
+        <ellipse cx="31.6" cy="56" rx="3.3" ry="5.1" fill={skinD} />
+        <ellipse cx="68.4" cy="56" rx="3.3" ry="5.1" fill={skinD} />
+        <path d="M30.5 54.6 C31.7 55.7 31.7 57.5 30.7 58.5" stroke="rgba(15,8,4,0.25)" strokeWidth="0.9" fill="none" />
+        <path d="M69.5 54.6 C68.3 55.7 68.3 57.5 69.3 58.5" stroke="rgba(15,8,4,0.25)" strokeWidth="0.9" fill="none" />
 
         {/* bun (female style 2) */}
-        {female && style === 2 && <circle cx="50" cy="24.5" r="7" fill={hairG} />}
+        {female && style === 2 && <circle cx="50" cy="19.5" r="6.6" fill={hairG} />}
 
         {/* back hair falling behind shoulders (female long / bob) */}
         {female && style === 0 && (
@@ -143,86 +178,72 @@ export function Portrait({ person, className = "", monogram = "text-2xl", myster
           <path d="M32,46 C30,58 32,66 38,71 C40,64 38,55 36,48 Z M68,46 C70,58 68,66 62,71 C60,64 62,55 64,48 Z" fill={hairG} />
         )}
 
-        {/* neck */}
-        <rect x="44" y="60" width="12" height="18" rx="5" fill={skinD} />
+        {/* head — egg-shaped with a real chin */}
+        <path d="M32 52 C32 33.5 40 25.5 50 25.5 C60 25.5 68 33.5 68 52 C68 62 63.6 70.6 57 74.2 C53.8 76 46.2 76 43 74.2 C36.4 70.6 32 62 32 52 Z" fill={`url(#${g}-sk)`} />
+        <path d="M43 74.2 C46.2 76 53.8 76 57 74.2 C55.4 76.7 44.6 76.7 43 74.2 Z" fill="rgba(15,8,4,0.14)" />
+        {female && !mystery && <><circle cx="40.2" cy="60.8" r="2.7" fill="#e06d78" opacity="0.2" /><circle cx="59.8" cy="60.8" r="2.7" fill="#e06d78" opacity="0.2" /></>}
 
-        {/* torso / clothing in the category color */}
-        <path d="M13,120 C13,97 26,86 50,86 C74,86 87,97 87,120 Z" fill={`url(#${g}-cl)`} />
-        <path d="M18,120 C18,100 30,90 50,90 C70,90 82,100 82,120" fill="none" stroke="#ffffff" strokeWidth="1.1" opacity="0.1" />
-
-        {/* collar — jewel neck for women, shirt + tie for men */}
-        {female ? (
-          <path d="M41,87.5 C44,92.5 56,92.5 59,87.5 L56.8,85.6 C54,89 46,89 43.2,85.6 Z" fill="#0d1927" opacity="0.85" />
-        ) : (
-          <>
-            <path d="M42,86 L50,95.5 L58,86 L53.6,86 L50,90.6 L46.4,86 Z" fill="#0d1927" opacity="0.9" />
-            <path d="M48.7,95 L51.3,95 L50,103.5 Z" fill={c2} opacity="0.92" />
-          </>
+        {/* beard — 1 stubble · 2 full + mustache · 3 goatee + mustache */}
+        {(beardStyle === 1 || beardStyle === 2) && (
+          <path d="M33.6 54 C34.2 66 41 76.6 50 77.6 C59 76.6 65.8 66 66.4 54 C65.8 62.5 60 70 50 71 C40 70 34.2 62.5 33.6 54 Z" fill={hairG} opacity={beardStyle === 1 ? 0.85 : 1} />
+        )}
+        {beardStyle === 3 && (
+          <path d="M45.3 70 C45.3 75 47.8 77.6 50 78 C52.2 77.6 54.7 75 54.7 70 C53 72.6 47 72.6 45.3 70 Z" fill={hairG} />
+        )}
+        {beardStyle >= 2 && (
+          <path d="M44.8 64.9 C47 63.1 53 63.1 55.2 64.9 C53 66.4 47 66.4 44.8 64.9 Z" fill={hairG} />
         )}
 
-        {/* category badge on chest */}
-        {!mystery && (
-          <g>
-            <circle cx="50" cy="110" r="5" fill="#0b1826" opacity="0.72" />
-            <path d="M50,105.8 l1.65,2.55 2.55,1.65 -2.55,1.65 -1.65,2.55 -1.65,-2.55 -2.55,-1.65 2.55,-1.65 Z" fill={c2} opacity="0.95" />
+        {/* eyebrows */}
+        <path d="M39.4 46.7 C41.8 45 45.4 45 47.4 46.4" stroke={hairC} strokeWidth={female ? 1.3 : 1.7} fill="none" strokeLinecap="round" />
+        <path d="M52.6 46.4 C54.6 45 58.2 45 60.6 46.7" stroke={hairC} strokeWidth={female ? 1.3 : 1.7} fill="none" strokeLinecap="round" />
+
+        {/* eyes — white, iris, pupil, sparkle, lid line */}
+        <ellipse cx="43.5" cy="52.2" rx="3.15" ry="2.2" fill="#fbf7ee" />
+        <ellipse cx="56.5" cy="52.2" rx="3.15" ry="2.2" fill="#fbf7ee" />
+        <circle cx="43.7" cy="52.3" r="1.6" fill="#3a2a1b" />
+        <circle cx="56.3" cy="52.3" r="1.6" fill="#3a2a1b" />
+        <circle cx="43.7" cy="52.3" r="0.85" fill="#16100a" />
+        <circle cx="56.3" cy="52.3" r="0.85" fill="#16100a" />
+        <circle cx="43.05" cy="51.6" r="0.5" fill="#ffffff" />
+        <circle cx="55.65" cy="51.6" r="0.5" fill="#ffffff" />
+        <path d="M40.3 51.6 C42 49.9 45.6 49.9 46.9 51.8" stroke="#221811" strokeWidth={female ? 1.1 : 0.9} fill="none" strokeLinecap="round" />
+        <path d="M53.1 51.8 C54.4 49.9 58 49.9 59.7 51.6" stroke="#221811" strokeWidth={female ? 1.1 : 0.9} fill="none" strokeLinecap="round" />
+
+        {/* nose */}
+        <path d="M50 53.8 C50 56.6 49.7 59 48.9 60.7 C49.7 61.7 51.2 61.6 51.9 60.7" stroke="rgba(60,32,16,0.42)" strokeWidth="1.05" fill="none" strokeLinecap="round" />
+
+        {/* mouth */}
+        {female && !mystery && <path d="M45.8 66.9 C47.8 68.9 52.2 68.9 54.2 66.9 C53 69.7 47 69.7 45.8 66.9 Z" fill="#b4574e" opacity="0.92" />}
+        <path d="M45.6 66.8 C47.6 69.1 52.4 69.1 54.4 66.8" stroke="#8a4a3d" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+
+        {/* front hair — hairline cap, swept fringe, buzz cut / bun cap */}
+        {female ? (
+          <path d="M32.5 50 C32 31.5 40 24.8 50 24.8 C60 24.8 68 31.5 67.5 50 C67.5 41.5 63.5 36 57.5 35.4 C53.5 35 46.5 35 42.5 35.4 C36.5 36 32.5 41.5 32.5 50 Z" fill={hairG} />
+        ) : style === 1 ? (
+          <path d="M32 51 C31 31 41 24.5 51 25 C61 25.5 69 33 68 51 C67.2 42 63.4 37 56.4 36.4 C50.4 35.9 47 37 44.6 39.6 C42 37 37 38 34.6 42.2 C33 45 32.3 47.8 32 51 Z" fill={hairG} />
+        ) : (
+          <path d="M32 51 C31.5 32 40 25 50 25 C60 25 68.5 32 68 51 C68 42.8 64.8 37.3 58.8 36.4 C54.8 35.8 45.2 35.8 41.2 36.4 C35.2 37.3 32 42.8 32 51 Z" fill={hairG} opacity={style === 2 ? 0.5 : 1} />
+        )}
+        {/* hair shine */}
+        <path d="M40.5 29.4 C44.5 26.9 52.5 26.5 57.5 29" stroke="#ffffff" opacity="0.16" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+
+        {/* glasses */}
+        {glasses && (
+          <g stroke="rgba(12,20,30,0.85)" strokeWidth="1.3">
+            <circle cx="43.5" cy="52.2" r="5.6" fill="rgba(150,190,230,0.12)" />
+            <circle cx="56.5" cy="52.2" r="5.6" fill="rgba(150,190,230,0.12)" />
+            <path d="M49.1 51.4 C49.7 50.7 50.3 50.7 50.9 51.4" fill="none" />
+            <path d="M37.9 51.3 L33.6 50.3 M62.1 51.3 L66.4 50.3" fill="none" />
           </g>
         )}
 
-        {/* ears + earrings */}
-        <ellipse cx="34.4" cy="52" rx="3" ry="4.6" fill={skinD} />
-        <ellipse cx="65.6" cy="52" rx="3" ry="4.6" fill={skinD} />
-        {earring && (<><circle cx="34.2" cy="57.6" r="1.1" fill={c2} /><circle cx="65.8" cy="57.6" r="1.1" fill={c2} /></>)}
-
-        {/* head */}
-        <ellipse cx="50" cy="50" rx="15.4" ry="18.4" fill={`url(#${g}-sk)`} />
-
-        {/* beard (mostly ancient/classical eras) */}
-        {hasBeard && (
-          <>
-            <path d="M36,54 C36.5,66 42,73.5 50,73.5 C58,73.5 63.5,66 64,54 C63,64 57.5,69.5 50,69.5 C42.5,69.5 37,64 36,54 Z" fill={hairG} />
-            <path d="M44,59.3 C46.5,57.9 53.5,57.9 56,59.3 C53.5,61 46.5,61 44,59.3 Z" fill={hairG} />
-          </>
-        )}
-
-        {/* eyes */}
-        <ellipse cx="43.8" cy="50.6" rx="1.9" ry={female ? 2.7 : 2.4} fill="#241d18" />
-        <ellipse cx="56.2" cy="50.6" rx="1.9" ry={female ? 2.7 : 2.4} fill="#241d18" />
-        <circle cx="44.5" cy="49.8" r="0.65" fill="#ffffff" opacity="0.9" />
-        <circle cx="56.9" cy="49.8" r="0.65" fill="#ffffff" opacity="0.9" />
-        {/* brows */}
-        <path d="M40.4,45.6 C42.4,44.1 45.4,44.1 47,45.3" fill="none" stroke={hairC} strokeWidth={female ? 1.1 : 1.4} strokeLinecap="round" />
-        <path d="M59.6,45.6 C57.6,44.1 54.6,44.1 53,45.3" fill="none" stroke={hairC} strokeWidth={female ? 1.1 : 1.4} strokeLinecap="round" />
-        {/* nose */}
-        <path d="M50,50.5 C50.9,54 50.7,56.2 49.1,57.2" fill="none" stroke={skinD} strokeWidth="1.1" strokeLinecap="round" opacity="0.75" />
-        {/* lips */}
-        {female ? (
-          <path d="M45.2,61.6 C47.2,60.3 49,60.4 50,61.1 C51,60.4 52.8,60.3 54.8,61.6 C52.8,63.8 47.2,63.8 45.2,61.6 Z" fill="#c05f5b" opacity="0.92" />
-        ) : (
-          <path d="M45.8,62.2 C48,63.1 52,63.1 54.2,62.2" fill="none" stroke="#7c4a3a" strokeWidth="1.2" strokeLinecap="round" opacity="0.8" />
-        )}
-        {/* blush */}
-        {female && (<><circle cx="40.5" cy="56.5" r="2.6" fill="#e2707a" opacity="0.2" /><circle cx="59.5" cy="56.5" r="2.6" fill="#e2707a" opacity="0.2" /></>)}
-
-        {/* hair cap */}
-        {female ? (
-          <path d="M33.5,50 C31,32 39,25 50,25 C61,25 69,32 66.5,50 C66.5,39 60,31.5 50,31.5 C40,31.5 33.5,39 33.5,50 Z" fill={hairG} />
-        ) : (
-          <path d="M34.6,47 C33,34 40,27 50,27 C60,27 67,34 65.4,47 C64,38 58,33.5 50,33.5 C42,33.5 36,38 34.6,47 Z" fill={hairG} />
-        )}
-        {/* male side fringe variant */}
-        {!female && style === 1 && (
-          <path d="M40,34.5 C44,38.5 48,39.5 52,38.5 C49.5,35.5 45,33.8 40,34.5 Z" fill={hairG} />
-        )}
-        {/* female front strands */}
-        {female && style === 0 && (
-          <path d="M34.2,44 C32.2,54 33,64 37.2,70.5 C38.2,62 36.6,52 36.2,45 Z M65.8,44 C67.8,54 67,64 62.8,70.5 C61.8,62 63.4,52 63.8,45 Z" fill={hairG} />
-        )}
-        {/* hair shine */}
-        <path d="M40.5,29.6 C44.5,26.8 55.5,26.8 59.5,29.6" fill="none" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" opacity="0.14" />
+        {/* earrings */}
+        {earring && <><circle cx="31.6" cy="62.2" r="1.25" fill={c2} /><circle cx="68.4" cy="62.2" r="1.25" fill={c2} /></>}
 
         {/* category-colored rim light */}
-        <path d="M63.5,36 C66.6,42 67,54 62.5,62" fill="none" stroke={c2} strokeWidth="1.5" strokeLinecap="round" opacity="0.5" />
-        <path d="M68,88 C78,92 84,102 85.5,114" fill="none" stroke={c2} strokeWidth="2" strokeLinecap="round" opacity="0.28" />
+        <path d="M33.2 47 C33.6 33 41 26.4 49.5 26.2" stroke={c2} opacity={mystery ? 0.22 : 0.5} strokeWidth="1.5" fill="none" strokeLinecap="round" />
+        <path d="M68 88 C78 92 84 102 85.5 116" stroke={c2} strokeWidth="2" strokeLinecap="round" opacity="0.28" />
       </svg>
 
       {mystery && (
